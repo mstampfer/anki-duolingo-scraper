@@ -10,6 +10,7 @@ A multilingual vocabulary scraper that extracts words from Duolingo via duome.eu
 - 🚀 **Easy Setup**: One-command installation with detailed setup instructions
 - 📊 **Progress Logging**: Real-time feedback on audio downloads and processing
 - 🔄 **Incremental Updates**: Skip existing audio files for faster re-runs
+- 🤖 **AI Translation**: Use Claude API to translate words missing English translations
 
 ## Quick Start
 
@@ -28,6 +29,9 @@ python scraper.py
 python scraper.py -l es  # Spanish
 python scraper.py -l fr  # French
 python scraper.py -l de  # German
+
+# With Claude API for missing translations (optional)
+python scraper.py -l es --api-key your_anthropic_api_key
 ```
 
 ## Supported Languages
@@ -56,6 +60,9 @@ python scraper.py -l <language_code>
 python scraper.py -l es  # Spanish
 python scraper.py -l ja  # Japanese
 python scraper.py -l de  # German
+
+# With Claude API for better translations
+python scraper.py -l ja --api-key your_anthropic_api_key
 ```
 
 ## Output
@@ -70,6 +77,7 @@ Import the `.apkg` file into Anki using `File → Import`.
 - Python 3.7+
 - Internet connection (for scraping and TTS)
 - See `requirements.txt` for package dependencies
+- Optional: Anthropic API key for enhanced translations
 
 ## Installation
 
@@ -93,8 +101,9 @@ For detailed setup instructions, see [`setup.md`](setup.md).
 
 1. **Scrapes** vocabulary from `duome.eu/vocabulary/en/{language}/skills`
 2. **Extracts** target language words, pronunciations, and English translations
-3. **Generates** audio files using Google Text-to-Speech
-4. **Creates** Anki deck with dual-sided flashcards and embedded audio
+3. **Translates** missing words using Claude API (if API key provided)
+4. **Generates** audio files using Google Text-to-Speech
+5. **Creates** Anki deck with dual-sided flashcards and embedded audio
 
 ## Example Output
 
@@ -105,6 +114,7 @@ Parsing vocabulary entries...
 ✓ Audio downloaded: hola
 ✓ Audio downloaded: gracias
 • Audio exists: adiós
+🤖 Claude translation: modismo → idiom
 ✓ Audio downloaded: por favor
 Found 847 vocabulary entries.
 Creating Anki deck...

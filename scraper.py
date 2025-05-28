@@ -7,6 +7,11 @@ import random
 from gtts import gTTS
 import sys
 import argparse
+try:
+    import anthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
 
 
 def main():
@@ -14,6 +19,8 @@ def main():
     parser = argparse.ArgumentParser(description='Scrape Duolingo vocabulary and create Anki flashcards')
     parser.add_argument('-l', '--language', default='ru', 
                        help='Target language code (ISO 639-1, e.g., ru, es, fr, de). Default: ru (Russian)')
+    parser.add_argument('--api-key', 
+                       help='Anthropic API key for translating missing words (optional)')
     args = parser.parse_args()
     
     # Language configuration
@@ -38,6 +45,17 @@ def main():
     }
     
     lang_name = lang_names.get(lang_code, lang_code.upper())
+    
+    # Initialize Claude API client if available and API key provided
+    claude_client = None
+    if ANTHROPIC_AVAILABLE and args.api_key:
+        try:
+            claude_client = anthropic.Anthropic(api_key=args.api_key)
+            print("✓ Claude API initialized for translation assistance")
+        except Exception as e:
+            print(f"⚠ Warning: Failed to initialize Claude API: {e}")
+    elif args.api_key and not ANTHROPIC_AVAILABLE:
+        print("⚠ Warning: API key provided but anthropic package not installed. Install with: pip install anthropic")
     
     print(f"Starting to scrape Duolingo {lang_name} vocabulary...")
 
@@ -74,6 +92,30 @@ def main():
     # Create a directory for audio files
     audio_dir = f'audio_{lang_code}'
     os.makedirs(audio_dir, exist_ok=True)
+
+    # Function to translate using Claude API
+    def translate_with_claude(word, target_lang_name, target_lang_code):
+        """Translate a word using Claude API"""
+        if not claude_client:
+            return None
+        
+        try:
+            message = claude_client.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=100,
+                messages=[
+                    {
+                        "role": "user", 
+                        "content": f"Translate this {target_lang_name} word to English. Provide only the English translation, no explanation: {word}"
+                    }
+                ]
+            )
+            translation = message.content[0].text.strip()
+            print(f"🤖 Claude translation: {word} → {translation}")
+            return translation
+        except Exception as e:
+            print(f"⚠ Claude API error for '{word}': {e}")
+            return None
 
     # Function to generate audio using gTTS (Google Text-to-Speech)
     def generate_audio(text, filename, lang=lang_code):
@@ -135,6 +177,15 @@ def main():
             else:
                 pronunciation = ""
                 english_translation = title_text.strip()
+            
+            # If no English translation found, try Claude API
+            if not english_translation or english_translation == target_word:
+                claude_translation = translate_with_claude(target_word, lang_name, lang_code)
+                if claude_translation:
+                    english_translation = claude_translation
+                else:
+                    print(f"⚠ No translation found for: {target_word}")
+                    english_translation = "[No translation]"
 
             # Generate audio using Google Text-to-Speech
             audio_filename = f"{audio_dir}/{target_word}.mp3"

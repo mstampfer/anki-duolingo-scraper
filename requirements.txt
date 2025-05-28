@@ -2,3 +2,4 @@ requests>=2.25.1
 beautifulsoup4>=4.9.3
 genanki>=0.13.0
 gtts>=2.2.3
+anthropic>=0.7.0
