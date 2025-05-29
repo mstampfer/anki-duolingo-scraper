@@ -81,3 +81,12 @@ For enhanced features including translations of missing words and contextual exa
 - For audio generation issues, ensure you have an internet connection for Google TTS
 - If Claude API fails, check your API key and billing status at console.anthropic.com
 - The scraper will work without Claude API but won't generate example sentences
+- If sentence audio seems mismatched, the scraper automatically detects and regenerates corrupted audio files
+
+## Audio File Management
+
+The scraper creates separate directories for different audio types:
+- `audio_{language}/` - Word pronunciation files
+- `audio_{language}_sentences/` - Example sentence audio files with `.txt` metadata for validation
+
+**Audio Validation**: Each sentence audio file is paired with a `.txt` metadata file containing the exact sentence text. This ensures that if sentences change between runs, the audio is automatically regenerated to match.

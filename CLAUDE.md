@@ -78,7 +78,13 @@ The scraper includes specific handling for:
 
 ## Audio Generation
 
-Audio files for both words and sentences are generated only if they don't already exist, allowing for incremental runs. The script handles TTS rate limiting gracefully by skipping remaining audio generation while still creating the Anki deck. Sentence audio files are stored in a separate directory with `_sentence.mp3` suffix.
+Audio files for both words and sentences are generated only if they don't already exist, allowing for incremental runs. The script handles TTS rate limiting gracefully by skipping remaining audio generation while still creating the Anki deck. 
+
+**Sentence Audio Validation**: The script now includes intelligent sentence audio validation. Each sentence audio file has an accompanying `.txt` metadata file that stores the exact sentence text. When processing existing words, the script compares the current sentence with the stored sentence text and regenerates the audio if they don't match, ensuring audio-sentence consistency.
+
+Audio files are stored in separate directories:
+- `audio_{lang_code}/` - Word pronunciation audio
+- `audio_{lang_code}_sentences/` - Example sentence audio with matching `.txt` metadata files
 
 ## Enhanced APKG Format
 

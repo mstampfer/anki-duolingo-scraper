@@ -120,7 +120,8 @@ Parsing vocabulary entries...
 🔊 Sentence audio downloaded: ¡Hola! ¿Cómo estás?
 • Audio exists: hola
 📖 Using existing translation: gracias → thank you
-🎯 Claude sentence: Muchas gracias por tu ayuda → Thank you very much for your help
+📝 Using existing sentence: gracias
+🔄 Sentence changed, regenerating audio: Muchas gracias por...
 🔊 Sentence audio downloaded: Muchas gracias por tu ayuda
 • Audio exists: gracias
 Found 847 vocabulary entries.
@@ -159,6 +160,7 @@ Each vocabulary word creates two flashcards with enhanced content:
 - **Network Issues**: Robust error handling for connectivity problems
 - **Missing Data**: Validates vocabulary extraction and reports issues
 - **File Management**: Incremental audio generation and cleanup
+- **Audio-Sentence Sync**: Automatically validates and regenerates sentence audio if content changes
 
 ## Contributing
 

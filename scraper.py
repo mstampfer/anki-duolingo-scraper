@@ -256,11 +256,38 @@ def main():
     # Function to generate sentence audio using gTTS
     def generate_sentence_audio(sentence, filename, lang=lang_code):
         """Generate audio file for example sentence with 429 error handling"""
-        # Only generate audio if file doesn't exist or is empty
-        if not os.path.exists(filename) or os.path.getsize(filename) == 0:
+        # Always regenerate audio if the sentence content has changed
+        regenerate_audio = False
+        
+        if os.path.exists(filename) and os.path.getsize(filename) > 0:
+            # Check if we have a metadata file to compare sentence content
+            metadata_file = filename + '.txt'
+            if os.path.exists(metadata_file):
+                try:
+                    with open(metadata_file, 'r', encoding='utf-8') as f:
+                        stored_sentence = f.read().strip()
+                    if stored_sentence != sentence:
+                        regenerate_audio = True
+                        print(f"🔄 Sentence changed, regenerating audio: {sentence[:30]}...")
+                except Exception:
+                    regenerate_audio = True
+            else:
+                # No metadata file exists, regenerate to be safe
+                regenerate_audio = True
+        else:
+            # File doesn't exist or is empty
+            regenerate_audio = True
+        
+        if regenerate_audio:
             try:
                 tts = gTTS(text=sentence, lang=lang, slow=False)
                 tts.save(filename)
+                
+                # Save sentence metadata for future comparison
+                metadata_file = filename + '.txt'
+                with open(metadata_file, 'w', encoding='utf-8') as f:
+                    f.write(sentence)
+                
                 print(f"🔊 Sentence audio downloaded: {sentence[:50]}...")
                 return True, False  # (success, is_429)
             except requests.exceptions.HTTPError as e:
