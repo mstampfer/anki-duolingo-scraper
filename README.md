@@ -1,16 +1,17 @@
 # Duolingo Vocabulary Scraper for Anki
 
-A multilingual vocabulary scraper that extracts words from Duolingo via duome.eu and creates Anki flashcard decks with audio pronunciations.
+A multilingual vocabulary scraper that extracts words from Duolingo via duome.eu and creates Anki flashcard decks with audio pronunciations and contextual example sentences.
 
 ## Features
 
 - 🌍 **Multilingual Support**: Scrape vocabulary for 14+ languages
 - 🔊 **Audio Pronunciations**: Automatic TTS audio generation using Google Text-to-Speech
-- 📚 **Dual-sided Flashcards**: Target Language ↔ English with pronunciation guides
+- 📝 **Example Sentences**: AI-generated contextual sentences with audio for better learning
+- 📚 **Dual-sided Flashcards**: Target Language ↔ English with pronunciation guides and examples
 - 🚀 **Easy Setup**: One-command installation with detailed setup instructions
 - 📊 **Progress Logging**: Real-time feedback on audio downloads and processing
-- 🔄 **Incremental Updates**: Skip existing audio files for faster re-runs
-- 🤖 **AI Translation**: Use Claude API to translate words missing English translations
+- 🔄 **Incremental Updates**: Skip existing audio and sentences for faster re-runs
+- 🤖 **AI Translation & Sentences**: Use Claude API to translate words and generate example sentences
 
 ## Quick Start
 
@@ -30,7 +31,7 @@ python scraper.py -l es  # Spanish
 python scraper.py -l fr  # French
 python scraper.py -l de  # German
 
-# With Claude API for missing translations (optional)
+# With Claude API for translations and example sentences (recommended)
 python scraper.py -l es --api-key your_anthropic_api_key
 ```
 
@@ -61,14 +62,15 @@ python scraper.py -l es  # Spanish
 python scraper.py -l ja  # Japanese
 python scraper.py -l de  # German
 
-# With Claude API for better translations
+# With Claude API for translations and example sentences
 python scraper.py -l ja --api-key your_anthropic_api_key
 ```
 
 ## Output
 
 - **Anki Deck**: `duolingo_{language_code}_vocabulary.apkg`
-- **Audio Files**: `audio_{language_code}/*.mp3`
+- **Word Audio Files**: `audio_{language_code}/*.mp3`
+- **Sentence Audio Files**: `audio_{language_code}_sentences/*.mp3`
 
 Import the `.apkg` file into Anki using `File → Import`.
 
@@ -77,7 +79,7 @@ Import the `.apkg` file into Anki using `File → Import`.
 - Python 3.7+
 - Internet connection (for scraping and TTS)
 - See `requirements.txt` for package dependencies
-- Optional: Anthropic API key for enhanced translations
+- Optional: Anthropic API key for translations and example sentences
 
 ## Installation
 
@@ -102,25 +104,54 @@ For detailed setup instructions, see [`setup.md`](setup.md).
 1. **Scrapes** vocabulary from `duome.eu/vocabulary/en/{language}/skills`
 2. **Extracts** target language words, pronunciations, and English translations
 3. **Translates** missing words using Claude API (if API key provided)
-4. **Generates** audio files using Google Text-to-Speech
-5. **Creates** Anki deck with dual-sided flashcards and embedded audio
+4. **Generates** example sentences with Claude API for contextual learning
+5. **Creates** audio files for words and sentences using Google Text-to-Speech
+6. **Builds** Anki deck with enhanced flashcards and embedded audio
 
 ## Example Output
 
 ```
 Starting to scrape Duolingo Spanish vocabulary...
+✓ Loaded 847 existing translations and 0 sentence examples
 Fetching vocabulary from https://duome.eu/vocabulary/en/es/skills...
 Parsing vocabulary entries...
-✓ Audio downloaded: hola
-✓ Audio downloaded: gracias
-• Audio exists: adiós
-🤖 Claude translation: modismo → idiom
-✓ Audio downloaded: por favor
+📖 Using existing translation: hola → hello
+🎯 Claude sentence: ¡Hola! ¿Cómo estás? → Hello! How are you?
+🔊 Sentence audio downloaded: ¡Hola! ¿Cómo estás?
+• Audio exists: hola
+📖 Using existing translation: gracias → thank you
+🎯 Claude sentence: Muchas gracias por tu ayuda → Thank you very much for your help
+🔊 Sentence audio downloaded: Muchas gracias por tu ayuda
+• Audio exists: gracias
 Found 847 vocabulary entries.
 Creating Anki deck...
 Successfully created Anki deck with 847 vocabulary cards.
 Output file: duolingo_es_vocabulary.apkg
 ```
+
+## Flashcard Format
+
+Each vocabulary word creates two flashcards with enhanced content:
+
+### Target Language → English
+**Front:**
+- Target word with audio pronunciation
+- Example sentence in target language with audio
+
+**Back:**
+- Word pronunciation guide
+- English translation
+- English translation of example sentence
+
+### English → Target Language
+**Front:**
+- English word
+- English example sentence
+
+**Back:**
+- Target language word with audio
+- Pronunciation guide
+- Target language example sentence with audio
 
 ## Error Handling
 

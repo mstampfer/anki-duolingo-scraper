@@ -19,6 +19,9 @@ pip install -r requirements.txt
 # With environment activated
 python scraper.py -l ru
 
+# With Claude API for enhanced features (recommended)
+python scraper.py -l ru --api-key your_anthropic_api_key
+
 # Or run directly without activating
 mamba run -n duolingo_scraper python scraper.py -l ru
 ```
@@ -42,7 +45,11 @@ pip install -r requirements.txt
 
 ### Run the scraper:
 ```bash
+# Basic usage
 python scraper.py -l ru
+
+# With Claude API for enhanced features (recommended)
+python scraper.py -l ru --api-key your_anthropic_api_key
 ```
 
 ## Dependencies
@@ -51,9 +58,26 @@ python scraper.py -l ru
 - `beautifulsoup4` - HTML parsing  
 - `genanki` - Anki deck generation
 - `gtts` - Google Text-to-Speech
+- `anthropic` - Claude API for translations and example sentences (optional)
+
+## Claude API Setup (Optional but Recommended)
+
+For enhanced features including translations of missing words and contextual example sentences:
+
+1. Get an API key from [console.anthropic.com](https://console.anthropic.com)
+2. Set up billing (minimum $5 payment required)
+3. Use the `--api-key` parameter when running the scraper
+
+**Benefits of using Claude API:**
+- Translates words that don't have English translations from duome.eu
+- Generates contextual example sentences for better vocabulary learning
+- Creates audio for example sentences
+- Enhances flashcards with real-world usage examples
 
 ## Troubleshooting
 
 - If you get SSL errors with `gtts`, try upgrading pip: `pip install --upgrade pip`
 - If `genanki` fails to install, make sure you have a recent version of Python (3.7+)
 - For audio generation issues, ensure you have an internet connection for Google TTS
+- If Claude API fails, check your API key and billing status at console.anthropic.com
+- The scraper will work without Claude API but won't generate example sentences
