@@ -1,0 +1,32 @@
+# Generated APKG files (Anki deck outputs)
+*.apkg
+*.apkg_
+
+# Audio directories (generated outputs)
+audio_*/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.venv
+env/
+venv/
+
+# Temporary files
+*.tmp
+*.temp
