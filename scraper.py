@@ -7,11 +7,62 @@ import random
 from gtts import gTTS
 import sys
 import argparse
+import zipfile
+import sqlite3
+import shutil
+import tempfile
 try:
     import anthropic
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
+
+
+def extract_existing_translations(apkg_path):
+    """Extract translation pairs from existing APKG file"""
+    translations = {}
+    
+    if not os.path.exists(apkg_path):
+        print(f"No existing APKG file found at {apkg_path}")
+        return translations
+    
+    print(f"Loading existing translations from {apkg_path}...")
+    
+    # Create temporary directory for extraction
+    with tempfile.TemporaryDirectory() as temp_dir:
+        try:
+            # Extract APKG (it's a ZIP file)
+            with zipfile.ZipFile(apkg_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+            
+            db_path = os.path.join(temp_dir, "collection.anki2")
+            
+            if not os.path.exists(db_path):
+                print("No collection.anki2 found in APKG file")
+                return translations
+            
+            # Connect to SQLite database
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Extract notes with their fields
+            # Fields are separated by \x1f character in Anki's format
+            cursor.execute("SELECT flds FROM notes")
+            for row in cursor.fetchall():
+                fields = row[0].split('\x1f')  # Split by field separator
+                if len(fields) >= 3:  # Target, Pronunciation, English
+                    target_word = fields[0].strip()
+                    english_translation = fields[2].strip()  # English is the 3rd field
+                    if target_word and english_translation and english_translation != "[No translation]":
+                        translations[target_word] = english_translation
+            
+            conn.close()
+            print(f"✓ Loaded {len(translations)} existing translations")
+            
+        except Exception as e:
+            print(f"⚠ Error reading APKG file: {e}")
+    
+    return translations
 
 
 def main():
@@ -45,6 +96,10 @@ def main():
     }
     
     lang_name = lang_names.get(lang_code, lang_code.upper())
+    
+    # Load existing translations from APKG file if it exists
+    output_file = f'duolingo_{lang_code}_vocabulary.apkg'
+    existing_translations = extract_existing_translations(output_file)
     
     # Initialize Claude API client if available and API key provided
     claude_client = None
@@ -178,14 +233,20 @@ def main():
                 pronunciation = ""
                 english_translation = title_text.strip()
             
-            # If no English translation found, try Claude API
+            # Check for existing translation first, then try Claude API if needed
             if not english_translation or english_translation == target_word:
-                claude_translation = translate_with_claude(target_word, lang_name, lang_code)
-                if claude_translation:
-                    english_translation = claude_translation
+                # Check if we have an existing translation
+                if target_word in existing_translations:
+                    english_translation = existing_translations[target_word]
+                    print(f"📖 Using existing translation: {target_word} → {english_translation}")
                 else:
-                    print(f"⚠ No translation found for: {target_word}")
-                    english_translation = "[No translation]"
+                    # Try Claude API for new translation
+                    claude_translation = translate_with_claude(target_word, lang_name, lang_code)
+                    if claude_translation:
+                        english_translation = claude_translation
+                    else:
+                        print(f"⚠ No translation found for: {target_word}")
+                        english_translation = "[No translation]"
 
             # Generate audio using Google Text-to-Speech
             audio_filename = f"{audio_dir}/{target_word}.mp3"
@@ -230,7 +291,6 @@ def main():
         deck.add_note(note)
 
     # Create the Anki package
-    output_file = f'duolingo_{lang_code}_vocabulary.apkg'
     package = genanki.Package(deck)
     if media_files:
         package.media_files = media_files
